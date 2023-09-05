@@ -22,7 +22,6 @@
   ec2_key:
     name: "{{ key_pair_name }}"
     region: "{{ ec2_region }}"
-    wait: True
   register: key_pair
   tags:
     - aws
@@ -38,7 +37,7 @@
     - aws
     - AWS
 
-- name: Looking  for {{ key_pair_file }}
+- name: Looking for {{ key_pair_file }}
   stat:
     path: "{{ key_pair_file }}"
   register: st_ssh_key
@@ -56,8 +55,8 @@
     - AWS
 
 - name: Find the default VPC
-  ec2_vpc_net_facts:
-    region: "{{ ec2_region }}"
+  ec2_vpc_net_info:
+    region: "eu-west-1"
     filters:
       isDefault: "true"
   register: vpc_nets
@@ -66,7 +65,7 @@
     - AWS
 
 - name: Find the default VPC subnet
-  ec2_vpc_subnet_facts:
+  ec2_vpc_subnet_info:
     region: "{{ ec2_region }}"
     filters:
       "vpc-id": "{{ vpc_nets.vpcs[0].vpc_id }}"
@@ -95,7 +94,7 @@
 
 #Look up the AMI id to use based on a search
 - name: Look up Debian Jessie AMI
-  ec2_ami_facts:
+  ec2_ami_info:
     owners: "{{ base_image.debian_aws_account_id }}"
     region: "{{ ec2_region }}"
     filters:
@@ -111,7 +110,7 @@
 
 #---- Launch EC2 instance ----
 - name: Launch an EC2 instance
-  ec2:
+  amazon.aws.ec2_instance:
     key_name: "{{ key_pair_name }}"
     assign_public_ip: True
     vpc_subnet_id: "{{ vpc_subnets.subnets[0].subnet_id }}"
